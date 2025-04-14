@@ -63,7 +63,7 @@ func main() {
 	}
 
 	// Post
-	status := fmt.Sprintf("DAY %d", int(time.Since(epoch).Hours()/24))
+	status := fmt.Sprintf("DAY %d", int(time.Since(epoch).Hours()/24)+1)
 	if err = post(context.Background(), config, token, status, mediaID); err != nil {
 		log.Fatal(err)
 	}
