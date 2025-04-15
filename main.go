@@ -132,7 +132,6 @@ func uploadMedia(filePath string, httpClient *http.Client) (string, error) {
 	}
 	log.Printf("media upload response: HTTP %d %s", resp.StatusCode, string(body))
 	mediaUploadResponse := struct {
-		MediaID       int    `json:"media_id"`
 		MediaIDString string `json:"media_id_string"`
 	}{}
 	if err = json.Unmarshal(body, &mediaUploadResponse); err != nil {
