@@ -75,6 +75,13 @@ func safeClose(closer io.Closer, name string) {
 	}
 }
 
+func filePathToDate(path string) (time.Time, error) {
+	tokens := strings.Split(path, "/")
+	strDate := tokens[len(tokens)-4] + "-" + tokens[len(tokens)-3] + "-" + tokens[len(tokens)-2]
+	strTime := tokens[len(tokens)-1][0:2] + ":" + tokens[len(tokens)-1][2:4] + ":" + tokens[len(tokens)-1][4:6]
+	return time.Parse(time.DateTime, strDate+" "+strTime)
+}
+
 func latestImageURL(imageHost, groupName, cameraName string) (string, error) {
 	resp, err := http.Get("https://" + imageHost + "/still/" + groupName + "/" + cameraName + "/latest.txt")
 	if err != nil {
@@ -87,6 +94,13 @@ func latestImageURL(imageHost, groupName, cameraName string) (string, error) {
 	}
 	if !strings.HasSuffix(string(body), ".jpg") {
 		return "", fmt.Errorf("unexpected latest.txt response: %s", string(body))
+	}
+	imgDate, err := filePathToDate(string(body))
+	if err != nil {
+		return "", fmt.Errorf("failed to parse timestamp from latest.txt: %w", err)
+	}
+	if diffHours := time.Since(imgDate).Hours(); diffHours > 24 {
+		return "", fmt.Errorf("obsolete image: %s (%.0f hours)", imgDate.Format(time.DateTime), diffHours)
 	}
 	return "https://" + imageHost + "/" + string(body), nil
 }
